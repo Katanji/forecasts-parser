@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Mail\NewBetEmail;
 use App\Models\Forecast;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\DomCrawler\Crawler;
 
 class ParseForecasts extends Command
@@ -35,7 +37,7 @@ class ParseForecasts extends Command
         $crawler->filter('.forecast-preview')->each(function ($node) {
             $profit = $node->filter('.forecast-preview__author-stat-item .is-up-color')->last()->text();
             if (!str_contains($profit, '%') || (float) $profit < 25) {
-//                return;
+                return;
             }
 
             $sportType = $node->filter('.forecast-preview__league')->first()->text();
@@ -83,7 +85,7 @@ class ParseForecasts extends Command
                 ->filter('.forecast-preview__extra-bet-item:contains("Кф") .forecast-preview__extra-bet-item-value.is-up-bg')
                 ->text();
 
-            Forecast::create([
+            $data = [
                 'teams'        => $teams,
                 'sport_type'   => $sportType,
                 'prediction'   => $prediction,
@@ -92,11 +94,16 @@ class ParseForecasts extends Command
                 'profit'       => $profit,
                 'coefficient'  => (float) $coefficient,
                 'explanation'  => $authorExplanation,
-            ]);
+            ];
 
-            $this->info("Forecast Date: $forecastDate, Last Results: $lastResults, Profit: $profit, " .
-                "Sport Type: $sportType, Teams: $teams, Prediction: $prediction, Coefficient: $coefficient, " .
-                "Explanation: $authorExplanation \n");
+            Forecast::create($data);
+            Mail::to('po6uh86@gmail.com')->send(new NewBetEmail($data));
+
+            $result = "Forecast Date: $forecastDate, \n Last Results: $lastResults, \n Profit: $profit, \n" .
+                "Sport Type: $sportType, \n Teams: $teams, \n Prediction: $prediction, \n Coefficient: $coefficient, \n" .
+                "Explanation: $authorExplanation";
+
+            $this->info("$result \n");
         });
     }
 }
