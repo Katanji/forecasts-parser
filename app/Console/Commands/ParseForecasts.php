@@ -41,7 +41,9 @@ class ParseForecasts extends Command
             }
 
             $sportType = $node->filter('.forecast-preview__league')->first()->text();
-            foreach (['Баскетбол', 'Волейбол', 'КХЛ', 'Настольный теннис', 'Желтые карточки'] as $value) {
+            $typesForExclude = ['Баскетбол', 'Волейбол', 'КХЛ', 'Настольный теннис', 'Желтые карточки', 'Лига Алеф',
+                'Чемпионат ОАЭ'];
+            foreach ($typesForExclude as $value) {
                 if (str_contains($sportType, $value)) {
                     return;
                 }
