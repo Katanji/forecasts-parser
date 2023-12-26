@@ -60,7 +60,7 @@ class ParseForecasts extends Command
                     $lastResults .= $lastResults === '' ? $result :  " $result";
             });
 
-            if (str_contains($lastResults, '-')) {
+            if (!strlen($lastResults) || str_contains($lastResults, '-')) {
                 return;
             }
 
