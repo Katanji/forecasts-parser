@@ -60,8 +60,8 @@ class ParseForecasts extends Command
                         'is-down' => '-1',
                     ][end($classes)];
 
-                    if ($lastResults && !$validateLastResults) {
-                        $validateLastResults = $lastResults === '-1' || $result === '-1' ? 'fail' : 'success';
+                    if (strlen($lastResults) && !$validateLastResults) {
+                        $validateLastResults = ($lastResults === '-1' || $result === '-1') ? 'fail' : 'success';
                     }
 
                     $lastResults .= $lastResults === '' ? $result :  " $result";
