@@ -35,6 +35,19 @@ class ParseForecasts extends Command
         }
 
         $crawler->filter('.forecast-preview')->each(function ($node) {
+            $coefficient = (float) $node
+                ->filter('.forecast-preview__extra-bet-item:contains("Кф") .forecast-preview__extra-bet-item-value.is-up-bg')
+                ->text();
+
+            if ($coefficient < 1.3) {
+                return;
+            }
+
+            $profit = (float) $node->filter('.forecast-preview__author-stat-item span')->last()->text();
+            if ($profit < -34) {
+                return;
+            }
+
             $sportType = $node->filter('.forecast-preview__league')->first()->text();
             $typesForExclude = [
                 'Волейбол', 'КХЛ', 'Настольный теннис', 'Желтые карточки', 'Лига Алеф', 'Чемпионат ОАЭ', 'Егип', 'Гана',
@@ -64,14 +77,6 @@ class ParseForecasts extends Command
                 return;
             }
 
-            $coefficient = (float) $node
-                ->filter('.forecast-preview__extra-bet-item:contains("Кф") .forecast-preview__extra-bet-item-value.is-up-bg')
-                ->text();
-
-            if ($coefficient < 1.3) {
-                return;
-            }
-
             $authorExplanation = '';
             if ($node->filter('.forecast-preview__text-inner')->count() > 0) {
                 $authorExplanation = $node->filter('.forecast-preview__text-inner')->text();
@@ -80,11 +85,6 @@ class ParseForecasts extends Command
             if (Forecast::where('explanation', $authorExplanation)->exists()) {
                 return;
             }
-
-            $profit = $node->filter('.forecast-preview__author-stat-item span')->last()->text();
-//            if (!str_contains($profit, '%') || (float) $profit < 25) {
-//                return;
-//            }
 
             $forecastDate = $node->filter('.forecast-preview__date')->text();
             $teams = $node->filter('.forecast-preview__teams')->text();
