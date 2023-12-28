@@ -20,6 +20,8 @@ class ParseForecasts extends Command
 
     public function handle(): void
     {
+//        @todo add analyzer for legs
+
         $response = (new Client())->request('GET', config('app.link_for_parse'), [
             'headers' => [
                 'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -44,7 +46,7 @@ class ParseForecasts extends Command
             }
 
             $profit = (int) round((float) $node->filter('.forecast-preview__author-stat-item span')->last()->text());
-            if ($profit < -34) {
+            if ($profit < 28) {
                 return;
             }
 
@@ -60,6 +62,7 @@ class ParseForecasts extends Command
                 }
             }
 
+            // @todo add filter by last 10 results
             $lastResults = '';
             $node->filter('.forecast-preview__author-results span')
                 ->each(function ($spanNode) use (&$lastResults, &$validateLastResults) {
