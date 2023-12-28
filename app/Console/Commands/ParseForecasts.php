@@ -43,7 +43,7 @@ class ParseForecasts extends Command
                 return;
             }
 
-            $profit = (float) $node->filter('.forecast-preview__author-stat-item span')->last()->text();
+            $profit = (int) round((float) $node->filter('.forecast-preview__author-stat-item span')->last()->text());
             if ($profit < -34) {
                 return;
             }
