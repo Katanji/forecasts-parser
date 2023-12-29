@@ -56,7 +56,7 @@ class ParseForecasts extends Command
             $typesForExclude = [
                 'Волейбол', 'КХЛ', 'Настольный теннис', 'Желтые карточки', 'Лига Алеф', 'Чемпионат ОАЭ', 'Егип', 'Гана',
                 'Бахрейн', 'Kontinental Hockey League', 'Чемпионат Бельгии. Премьер-лига', 'Киберспорт', 'Вброс аутов',
-                'Фолы',
+                'Фолы', 'Штрафное время',
             ];
 
             foreach ($typesForExclude as $value) {
