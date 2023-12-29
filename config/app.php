@@ -39,5 +39,6 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
-    'link_for_parse' => env('LINK_FOR_PARSE'),
+    'url_forecasts' => env('URL_FORECASTS'),
+    'url_author' => env('URL_AUTHOR'),
 ];

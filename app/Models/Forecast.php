@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,7 @@ class Forecast extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['teams', 'sport_type', 'prediction', 'date', 'last_results', 'profit', 'coefficient',
-        'explanation'];
+    protected $fillable = [
+        'author', 'coefficient', 'date','explanation', 'last_results', 'prediction', 'profit', 'sport_type', 'teams',
+    ];
 }

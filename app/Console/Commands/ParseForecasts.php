@@ -22,12 +22,14 @@ class ParseForecasts extends Command
     {
 //        @todo add analyzer for legs
 
-        $response = (new Client())->request('GET', config('app.link_for_parse'), [
+        $options = [
             'headers' => [
                 'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             ],
             'cookies' => new CookieJar()
-        ]);
+        ];
+
+        $response = (new Client())->request('GET', config('app.url_forecasts'), $options);
 
         $htmlContent = (string)$response->getBody();
         $crawler = new Crawler($htmlContent);
@@ -36,7 +38,7 @@ class ParseForecasts extends Command
             return;
         }
 
-        $crawler->filter('.forecast-preview')->each(function ($node) {
+        $crawler->filter('.forecast-preview')->each(function ($node) use ($options) {
             $coefficient = (float) $node
                 ->filter('.forecast-preview__extra-bet-item:contains("Кф") .forecast-preview__extra-bet-item-value.is-up-bg')
                 ->text();
@@ -89,6 +91,26 @@ class ParseForecasts extends Command
                 return;
             }
 
+            $author = $node->filter('.forecast-preview__author-name')->text();
+            $url = config('app.url_author') . str_replace(' ', '+', $author);
+            $authorResponse = (new Client())->request('GET', $url, $options);
+            $authorHtmlContent = (string) $authorResponse->getBody();
+            $authorCrawler = new Crawler($authorHtmlContent);
+
+            $authorCrawler->filter('.user-series__item')->each(function ($resultDiv, $index) use (&$lastResults) {
+                if ($index < 5) {
+                    return;
+                }
+
+                $classes = explode(' ', $resultDiv->attr('class'));
+                $result = [
+                    'is-win' => '1',
+                    'is-lose' => '-1',
+                ][end($classes)] ?? '0';
+
+                $lastResults .= " $result";
+            });
+
             $forecastDate = $node->filter('.forecast-preview__date')->text();
             $teams = $node->filter('.forecast-preview__teams')->text();
             $prediction = $node->filter('.forecast-preview__extra-bet-item-value.is-up-bg')->first()->text();
@@ -102,6 +124,7 @@ class ParseForecasts extends Command
                 'profit'       => $profit,
                 'coefficient'  => $coefficient,
                 'explanation'  => $authorExplanation,
+                'author'       => $author,
             ];
 
             Forecast::create($data);

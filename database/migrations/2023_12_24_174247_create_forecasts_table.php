@@ -14,10 +14,11 @@ return new class extends Migration
             $table->string('sport_type', 128);
             $table->string('prediction', 64);
             $table->string('date', 24);
-            $table->string('last_results', 24);
-            $table->string('profit', 16);
+            $table->string('last_results', 36);
+            $table->integer('profit');
             $table->float('coefficient');
             $table->text('explanation');
+            $table->string('author', 24);
             $table->timestamps();
         });
     }
