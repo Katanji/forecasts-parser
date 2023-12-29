@@ -103,11 +103,7 @@ class ParseForecasts extends Command
                 }
 
                 $classes = explode(' ', $resultDiv->attr('class'));
-                $result = [
-                    'is-win' => '1',
-                    'is-lose' => '-1',
-                ][end($classes)] ?? '0';
-
+                $result = ['is-win' => '1', 'is-lose' => '-1'][end($classes)] ?? '0';
                 $lastResults .= " $result";
             });
 
