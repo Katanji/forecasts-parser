@@ -57,7 +57,7 @@
     </tr>
     <tr>
         <th>Attractiveness</th>
-        <td>>{{ $data['attractiveness'] }}</a></td>
+        <td>{{ $data['attractiveness'] }}</a></td>
     </tr>
 </table>
 </body>
