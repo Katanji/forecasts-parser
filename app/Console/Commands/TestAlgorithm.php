@@ -107,6 +107,20 @@ class TestAlgorithm extends Command
             ['result' => 'win', 'coef' => 1.7],
         ]);
 
+        // must be bad
+        $zhenek2996 = CalculationsHelper::attractiveness([
+            ['result' => 'loose', 'coef' => 1.81],
+            ['result' => 'win', 'coef' => 2.28],
+            ['result' => 'loose', 'coef' => 2.18],
+            ['result' => 'loose', 'coef' => 1.79],
+            ['result' => 'win', 'coef' => 1.78],
+            ['result' => 'win', 'coef' => 2.27],
+            ['result' => 'loose', 'coef' => 2.01],
+            ['result' => 'win', 'coef' => 1.7],
+            ['result' => 'win', 'coef' => 2.23],
+            ['result' => 'win', 'coef' => 2.09],
+        ]);
+
         dd([
             '$winstreak5Total good' => $winstreak6Total,
             '$winstreak4Total bad' => $winstreak4Total,
@@ -114,6 +128,7 @@ class TestAlgorithm extends Command
             '$sanya_dokukin59Total good' => $sanya_dokukin59Total,
             '$parkinson bad' => $parkinson,
             '$SabjiK1987 bad' => $SabjiK1987,
+            '$zhenek2996 bad' => $zhenek2996,
         ]);
     }
 }

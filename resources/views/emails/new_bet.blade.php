@@ -55,6 +55,10 @@
         <th>Author</th>
         <td><a href="{{$data['author_link']}}">{{ $data['author'] }}</a></td>
     </tr>
+    <tr>
+        <th>Attractiveness</th>
+        <td>>{{ $data['attractiveness'] }}</a></td>
+    </tr>
 </table>
 </body>
 </html>

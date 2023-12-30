@@ -103,7 +103,7 @@ class ParseForecasts extends Command
             });
 
             $attractiveness = CalculationsHelper::attractiveness($bets);
-            if ($attractiveness < 233) {
+            if ($attractiveness < 267) {
                 return;
             }
 
@@ -122,7 +122,7 @@ class ParseForecasts extends Command
                 'coefficient'    => $coefficient,
                 'explanation'    => $authorExplanation,
                 'author'         => $author,
-                'author_link'    => $url
+                'author_link'    => $url,
             ];
 
             Forecast::create($data);
