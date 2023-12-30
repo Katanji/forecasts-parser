@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Http\Helpers\CalculationsHelper;
 use App\Mail\NewBetEmail;
 use App\Models\Forecast;
 use GuzzleHttp\Client;
@@ -49,7 +50,7 @@ class ParseForecasts extends Command
 
             $profit = (int) round((float) $node->filter('.forecast-preview__author-stat-item span')->last()->text());
             if ($profit < 28) {
-                return;
+//                return;
             }
 
             $sportType = $node->filter('.forecast-preview__league')->first()->text();
@@ -65,24 +66,6 @@ class ParseForecasts extends Command
                 }
             }
 
-            // @todo add filter by last 10 results
-            $lastResults = '';
-            $node->filter('.forecast-preview__author-results span')
-                ->each(function ($spanNode) use (&$lastResults, &$validateLastResults) {
-                    $classes = explode(' ', $spanNode->attr('class'));
-                    $result = [
-                        'is-up' => '1',
-                        'is-default' => '0',
-                        'is-down' => '-1',
-                    ][end($classes)];
-
-                    $lastResults .= $lastResults === '' ? $result :  " $result";
-            });
-
-            if (!strlen($lastResults) || str_contains($lastResults, '-')) {
-                return;
-            }
-
             $authorExplanation = '';
             if ($node->filter('.forecast-preview__text-inner')->count() > 0) {
                 $authorExplanation = $node->filter('.forecast-preview__text-inner')->text();
@@ -93,35 +76,53 @@ class ParseForecasts extends Command
             }
 
             $author = $node->filter('.forecast-preview__author-name')->text();
+            $author = preg_replace('/\s\/\d+$/', '', $author);
             $url = config('app.url_author') . str_replace(' ', '+', $author);
+
             $authorResponse = (new Client())->request('GET', $url, $options);
             $authorHtmlContent = (string) $authorResponse->getBody();
             $authorCrawler = new Crawler($authorHtmlContent);
 
-            $authorCrawler->filter('.user-series__item')->each(function ($resultDiv, $index) use (&$lastResults) {
-                if ($index < 5) {
-                    return;
-                }
+            $lastResults = '';
+            $bets = [];
+            $authorCrawler->filter('.user-series__item')
+                ->each(function ($resultDiv) use (&$lastResults, &$bets) {
+                    $classes = explode(' ', $resultDiv->attr('class'));
+                    $coefficient = (float) $resultDiv->filter('.user-series__kf')->text();
 
-                $classes = explode(' ', $resultDiv->attr('class'));
-                $result = ['is-win' => '1', 'is-lose' => '-1'][end($classes)] ?? '0';
-                $lastResults .= " $result";
+                    if (end($classes) === 'is-win') {
+                        $lastResults .= " 1";
+                        array_unshift($bets, ['result' => 'win', 'coef' => $coefficient]);
+                    } elseif (end($classes) === 'is-lose') {
+                        $lastResults .= " -1";
+                        array_unshift($bets, ['result' => 'loose', 'coef' => $coefficient]);
+                    } else {
+                        $lastResults .= " 0";
+                        array_unshift($bets, ['result' => 'draw', 'coef' => $coefficient]);
+                    }
             });
+
+            $attractiveness = CalculationsHelper::attractiveness($bets);
+            if ($attractiveness < 233) {
+                return;
+            }
 
             $forecastDate = $node->filter('.forecast-preview__date')->text();
             $teams = $node->filter('.forecast-preview__teams')->text();
             $prediction = $node->filter('.forecast-preview__extra-bet-item-value.is-up-bg')->first()->text();
 
             $data = [
-                'teams'        => $teams,
-                'sport_type'   => $sportType,
-                'prediction'   => $prediction,
-                'date'         => $forecastDate,
-                'last_results' => $lastResults,
-                'profit'       => $profit,
-                'coefficient'  => $coefficient,
-                'explanation'  => $authorExplanation,
-                'author'       => $author,
+                'teams'          => $teams,
+                'sport_type'     => $sportType,
+                'prediction'     => $prediction,
+                'attractiveness' => $attractiveness,
+                'date'           => $forecastDate,
+                'last_results'   => $lastResults,
+                'profit'         => $profit,
+                'coefficient'    => $coefficient,
+                'explanation'    => $authorExplanation,
+                'author'         => $author,
+                'author_link'    => $url
             ];
 
             Forecast::create($data);

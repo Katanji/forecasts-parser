@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('teams', 128);
             $table->string('sport_type', 128);
             $table->string('prediction', 64);
+            $table->integer('attractiveness');
             $table->string('date', 24);
             $table->string('last_results', 36);
             $table->integer('profit');

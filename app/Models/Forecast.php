@@ -15,6 +15,7 @@ class Forecast extends Model
     use HasFactory;
 
     protected $fillable = [
-        'author', 'coefficient', 'date','explanation', 'last_results', 'prediction', 'profit', 'sport_type', 'teams',
+        'attractiveness', 'author', 'coefficient', 'date','explanation', 'last_results', 'prediction', 'profit',
+        'sport_type', 'teams',
     ];
 }
