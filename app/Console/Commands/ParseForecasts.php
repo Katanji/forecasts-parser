@@ -50,7 +50,7 @@ class ParseForecasts extends Command
 
             $profit = (int) round((float) $node->filter('.forecast-preview__author-stat-item span')->last()->text());
             if ($profit < 28) {
-//                return;
+                return;
             }
 
             $sportType = $node->filter('.forecast-preview__league')->first()->text();
