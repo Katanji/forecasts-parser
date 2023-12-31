@@ -56,19 +56,6 @@ class ParseForecasts extends Command
         $crawler->filter('.forecast-preview')->each(/**
          * @throws GuzzleException
          */ function ($node) use ($options) {
-            $coefficient = (float)$node
-                ->filter('.forecast-preview__extra-bet-item:contains("Кф") .forecast-preview__extra-bet-item-value.is-up-bg')
-                ->text();
-
-            if ($coefficient < 1.3) {
-                return;
-            }
-
-            $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
-            if ($profit < 28) {
-                return;
-            }
-
             $sportType = $node->filter('.forecast-preview__league')->first()->text();
             foreach ($this->typesForExclude as $value) {
                 if (str_contains($sportType, $value)) {
@@ -76,14 +63,14 @@ class ParseForecasts extends Command
                 }
             }
 
-            $authorExplanation = '';
-            if ($node->filter('.forecast-preview__text-inner')->count() > 0) {
-                $authorExplanation = $node->filter('.forecast-preview__text-inner')->text();
-            }
-
-            if (Forecast::where('explanation', $authorExplanation)->exists()) {
+            $validatedParams = $this->validatedParams($node);
+            if (!$validatedParams) {
                 return;
             }
+
+            $coefficient = $validatedParams['coefficient'];
+            $profit = $validatedParams['profit'];
+            $authorExplanation = $validatedParams['authorExplanation'];
 
             $author = $node->filter('.forecast-preview__author-name')->text();
             $author = preg_replace('/\s\/\d+$/', '', $author);
@@ -133,6 +120,7 @@ class ParseForecasts extends Command
         $crawler->filter('.forecast-preview')->each(/**
          * @throws GuzzleException
          */ function ($node) use ($options) {
+
             $coefficient = (float)$node
                 ->filter('.forecast-preview__extra-bet-item:contains("Итоговый кф") .forecast-preview__extra-bet-item-value.is-up-bg')
                 ->text();
@@ -227,5 +215,28 @@ class ParseForecasts extends Command
         });
 
         return ['bets' => $bets, 'lastResults' => $lastResults];
+    }
+
+    private function validatedParams($node): ?array
+    {
+        $coefficient = (float)$node
+            ->filter('.forecast-preview__extra-bet-item:contains("Кф") .forecast-preview__extra-bet-item-value.is-up-bg')
+            ->text();
+        $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
+
+        if ($coefficient < 1.3 || $profit < 28) {
+            return null;
+        }
+
+        $authorExplanation = '';
+        if ($node->filter('.forecast-preview__text-inner')->count() > 0) {
+            $authorExplanation = $node->filter('.forecast-preview__text-inner')->text();
+        }
+
+        if (Forecast::where('explanation', $authorExplanation)->exists()) {
+            return null;
+        }
+
+        return ['coefficient' => $coefficient, 'profit' => $profit, 'authorExplanation' => $authorExplanation];
     }
 }
