@@ -40,5 +40,6 @@ return [
     ])->toArray(),
 
     'url_forecasts' => env('URL_FORECASTS'),
+    'url_expresses' => env('URL_EXPRESSES'),
     'url_author' => env('URL_AUTHOR'),
 ];
