@@ -39,6 +39,7 @@ class ParseForecasts extends Command
             ];
 
             self::handleForecasts($options);
+            self::handleExpresses($options);
         } catch (GuzzleException|Exception $e) {
             info($e->getMessage());
             Mail::to('po6uh86@gmail.com')->send(new ErrorEmail($e->getMessage()));
@@ -127,13 +128,13 @@ class ParseForecasts extends Command
 
     private function handleExpresses($options): void
     {
-        $response = (new Client())->request('GET', config('app.url_expresses'), $options);
-        $htmlContent = (string)$response->getBody();
-        $crawler = new Crawler($htmlContent);
+        $crawler = self::getCrawler(config('app.url_expresses'), $options);
 
-        $crawler->filter('.forecast-preview')->each(function ($node) use ($options) {
+        $crawler->filter('.forecast-preview')->each(/**
+         * @throws GuzzleException
+         */ function ($node) use ($options) {
             $coefficient = (float)$node
-                ->filter('.forecast-preview__extra-bet-item:contains("Кф") .forecast-preview__extra-bet-item-value.is-up-bg')
+                ->filter('.forecast-preview__extra-bet-item:contains("Итоговый кф") .forecast-preview__extra-bet-item-value.is-up-bg')
                 ->text();
 
             if ($coefficient < 1.3) {
@@ -143,13 +144,6 @@ class ParseForecasts extends Command
             $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
             if ($profit < 28) {
                 return;
-            }
-
-            $sportType = $node->filter('.forecast-preview__league')->first()->text();
-            foreach ($this->typesForExclude as $value) {
-                if (str_contains($sportType, $value)) {
-                    return;
-                }
             }
 
             $authorExplanation = '';
@@ -164,29 +158,9 @@ class ParseForecasts extends Command
             $author = $node->filter('.forecast-preview__author-name')->text();
             $author = preg_replace('/\s\/\d+$/', '', $author);
             $url = config('app.url_author') . str_replace(' ', '+', $author);
-
-            $authorResponse = (new Client())->request('GET', $url, $options);
-            $authorHtmlContent = (string)$authorResponse->getBody();
-            $authorCrawler = new Crawler($authorHtmlContent);
-
-            $lastResults = '';
-            $bets = [];
-            $authorCrawler->filter('.user-series__item')
-                ->each(function ($resultDiv) use (&$lastResults, &$bets) {
-                    $classes = explode(' ', $resultDiv->attr('class'));
-                    $coefficient = (float)$resultDiv->filter('.user-series__kf')->text();
-
-                    if (end($classes) === 'is-win') {
-                        $lastResults .= " 1";
-                        array_unshift($bets, ['result' => 'win', 'coef' => $coefficient]);
-                    } elseif (end($classes) === 'is-lose') {
-                        $lastResults .= " -1";
-                        array_unshift($bets, ['result' => 'loose', 'coef' => $coefficient]);
-                    } else {
-                        $lastResults .= " 0";
-                        array_unshift($bets, ['result' => 'draw', 'coef' => $coefficient]);
-                    }
-                });
+            $parsedAuthorData = self::parseAuthorCrawler($url, $options);
+            $bets = $parsedAuthorData['bets'];
+            $lastResults = $parsedAuthorData['lastResults'];
 
             $attractiveness = CalculationsHelper::attractiveness($bets);
             if ($attractiveness < 267) {
@@ -194,13 +168,10 @@ class ParseForecasts extends Command
             }
 
             $forecastDate = $node->filter('.forecast-preview__date')->text();
-            $teams = $node->filter('.forecast-preview__teams')->text();
-            $prediction = $node->filter('.forecast-preview__extra-bet-item-value.is-up-bg')->first()->text();
+            $teams = $node->filter('.express-table')->text();
 
             $data = [
                 'teams' => $teams,
-                'sport_type' => $sportType,
-                'prediction' => $prediction,
                 'attractiveness' => $attractiveness,
                 'date' => $forecastDate,
                 'last_results' => $lastResults,
@@ -215,8 +186,7 @@ class ParseForecasts extends Command
             Mail::to('po6uh86@gmail.com')->send(new NewBetEmail($data));
 
             $result = "Forecast Date: $forecastDate, \n Last Results: $lastResults, \n Profit: $profit, \n" .
-                "Sport Type: $sportType, \n Teams: $teams, \n Prediction: $prediction, \n Coefficient: $coefficient, \n" .
-                "Explanation: $authorExplanation";
+                "Teams: $teams, \n Coefficient: $coefficient, \n" . "Explanation: $authorExplanation";
 
             $this->info("$result \n");
         });
@@ -227,7 +197,7 @@ class ParseForecasts extends Command
      */
     private static function getCrawler(string $url, array $options): Crawler
     {
-        $response = (new Client())->request('GET', config('app.url_forecasts'), $options);
+        $response = (new Client())->request('GET', $url, $options);
         return new Crawler((string)$response->getBody());
     }
 

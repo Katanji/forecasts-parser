@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('forecasts', function (Blueprint $table) {
             $table->id();
-            $table->string('teams', 128);
-            $table->string('sport_type', 128);
-            $table->string('prediction', 64);
+            $table->text('teams');
+            $table->string('sport_type', 128)->default('');
+            $table->string('prediction', 64)->default('');
             $table->integer('attractiveness');
             $table->string('date', 24);
             $table->string('last_results', 36);
