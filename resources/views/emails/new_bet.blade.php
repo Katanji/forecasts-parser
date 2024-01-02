@@ -25,11 +25,11 @@
     </tr>
     <tr>
         <th>Sport Type</th>
-        <td>{{ $data['sport_type'] }}</td>
+        <td>{{ $data['sport_type'] ?? '' }}</td>
     </tr>
     <tr>
         <th>Prediction</th>
-        <td>{{ $data['prediction'] }}</td>
+        <td>{{ $data['prediction'] ?? '' }}</td>
     </tr>
     <tr>
         <th>Date</th>
