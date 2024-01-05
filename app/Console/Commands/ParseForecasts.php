@@ -12,6 +12,8 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\DomCrawler\Crawler;
@@ -32,18 +34,11 @@ class ParseForecasts extends Command
     public function handle(): void
     {
         try {
-            $options = [
-                'headers' => [
-                    'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                ],
-                'cookies' => new CookieJar()
-            ];
-
-            self::handleForecasts($options);
-            self::handleExpresses($options);
+            $options = $this->getHttpOptions();
+            $this->handleForecasts($options);
+            $this->handleExpresses($options);
         } catch (GuzzleException|Exception $e) {
-            info($e->getMessage());
-            Mail::to('po6uh86@gmail.com')->send(new ErrorEmail($e->getMessage()));
+            $this->logError($e);
         }
     }
 
@@ -52,7 +47,7 @@ class ParseForecasts extends Command
      */
     private function handleForecasts($options): void
     {
-        $crawler = self::getCrawler(config('app.url_forecasts'), $options);
+        $crawler = $this->makeRequestWithRetries(config('app.url_forecasts'), $options);
 
         $crawler->filter('.forecast-preview')->each(/**
          * @throws GuzzleException
@@ -116,7 +111,7 @@ class ParseForecasts extends Command
 
     private function handleExpresses($options): void
     {
-        $crawler = self::getCrawler(config('app.url_expresses'), $options);
+        $crawler = $this->makeRequestWithRetries(config('app.url_expresses'), $options);
 
         $crawler->filter('.forecast-preview')->each(/**
          * @throws GuzzleException
@@ -239,5 +234,37 @@ class ParseForecasts extends Command
         }
 
         return ['coefficient' => $coefficient, 'profit' => $profit, 'authorExplanation' => $authorExplanation];
+    }
+
+    private function makeRequestWithRetries(string $url, array $options, int $retries = 3): Crawler
+    {
+        for ($i = 0; $i < $retries; $i++) {
+            try {
+                $response = (new Client())->request('GET', $url, $options);
+                return new Crawler((string)$response->getBody());
+            } catch (GuzzleException $e) {
+                info("Retry $i for $url: " . $e->getMessage());
+                sleep(5);
+            }
+        }
+        throw new RequestException("Error after $retries retries for $url", new Request('GET', $url));
+    }
+
+    private function getHttpOptions(): array
+    {
+        return [
+            'headers' => [
+                'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            ],
+            'cookies' => new CookieJar(),
+            'connect_timeout' => 10,
+            'timeout' => 60,
+        ];
+    }
+
+    private function logError($e): void
+    {
+        info($e->getMessage());
+        Mail::to('po6uh86@gmail.com')->send(new ErrorEmail($e->getMessage()));
     }
 }
