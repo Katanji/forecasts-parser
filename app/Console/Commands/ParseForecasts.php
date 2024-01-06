@@ -28,7 +28,7 @@ class ParseForecasts extends Command
         'Волейбол', 'КХЛ', 'Настольный теннис', 'Желтые карточки', 'Лига Алеф', 'Чемпионат ОАЭ', 'Егип', 'Гана',
         'Бахрейн', 'Kontinental Hockey League', 'Чемпионат Бельгии. Премьер-лига', 'Киберспорт', 'Вброс аутов', 'Фолы',
         'Штрафное время', 'Броски в створ ворот', 'Германия. Мужчины. Pro A', 'Finland - Korisliiga', '2-я Бундеслига. ProA',
-        'Голы в большинстве', 'МХЛ', 'Lebanese Basketball League'
+        'Голы в большинстве', 'МХЛ', 'Lebanese Basketball League', 'Единая лига ВТБ',
     ];
 
     public function handle(): void
@@ -238,13 +238,15 @@ class ParseForecasts extends Command
 
     private function makeRequestWithRetries(string $url, array $options, int $retries = 3): Crawler
     {
+        $initialSleep = 5;
+
         for ($i = 0; $i < $retries; $i++) {
             try {
                 $response = (new Client())->request('GET', $url, $options);
                 return new Crawler((string)$response->getBody());
             } catch (GuzzleException $e) {
                 info("Retry $i for $url: " . $e->getMessage());
-                sleep(5);
+                sleep($initialSleep * ($i + 1));
             }
         }
         throw new RequestException("Error after $retries retries for $url", new Request('GET', $url));
@@ -258,7 +260,7 @@ class ParseForecasts extends Command
             ],
             'cookies' => new CookieJar(),
             'connect_timeout' => 10,
-            'timeout' => 60,
+            'timeout' => 120,
         ];
     }
 
