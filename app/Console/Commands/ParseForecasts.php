@@ -27,6 +27,7 @@ class ParseForecasts extends Command
     private array $typesForExclude = [
         'КХЛ', 'Желтые карточки', 'Kontinental Hockey League', 'Вброс аутов', 'Фолы', 'Штрафное время', 'МХЛ', 'ВХЛ',
         'Единая лига ВТБ', 'Броски в створ ворот', 'Голы в большинстве', 'Росси', 'Настольный теннис',
+        'Фигурное катание'
     ];
 
     public function handle(): void
