@@ -126,7 +126,7 @@ class ParseForecasts extends Command
             }
 
             $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
-            if ($profit < 55) {
+            if ($profit < 56) {
                 return;
             }
 
@@ -220,7 +220,7 @@ class ParseForecasts extends Command
             ->text();
         $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
 
-        if ($coefficient < 1.3 || $profit < 55) {
+        if ($coefficient < 1.3 || $profit < 56) {
             return null;
         }
 
