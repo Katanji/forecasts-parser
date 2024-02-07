@@ -28,7 +28,7 @@ class ParseForecasts extends Command
         'КХЛ', 'Желтые карточки', 'Kontinental Hockey League', 'Вброс аутов', 'Фолы', 'Штрафное время', 'МХЛ', 'ВХЛ',
         'Единая лига ВТБ', 'Броски в створ ворот', 'Голы в большинстве', 'Росси', 'Настольный теннис', 'Шахматы', 'MHL',
         'Фигурное катание', 'Индия. Суперкубок', 'Гандбол', 'Волейбол. European - Championship U20', 'Футбол. India',
-        'Адриатическая лига. Женщины', 'Кипр. Национальная лига. Женщины',
+        'Адриатическая лига. Женщины', 'Кипр. Национальная лига. Женщины', 'Водное поло'
     ];
 
     public function handle(): void
@@ -267,6 +267,6 @@ class ParseForecasts extends Command
     private function logError($e): void
     {
         info($e->getMessage());
-        Mail::to('po6uh86@gmail.com')->send(new ErrorEmail($e->getMessage()));
+//        Mail::to('po6uh86@gmail.com')->send(new ErrorEmail($e->getMessage()));
     }
 }
