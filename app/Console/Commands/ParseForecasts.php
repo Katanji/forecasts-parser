@@ -76,7 +76,7 @@ class ParseForecasts extends Command
             $lastResults = $parsedAuthorData['lastResults'];
 
             $attractiveness = CalculationsHelper::attractiveness($bets);
-            if ($attractiveness < 664) {
+            if ($attractiveness < 670) {
                 return;
             }
 
@@ -126,7 +126,7 @@ class ParseForecasts extends Command
             }
 
             $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
-            if ($profit < 62) {
+            if ($profit < 183) {
                 return;
             }
 
@@ -147,7 +147,7 @@ class ParseForecasts extends Command
             $lastResults = $parsedAuthorData['lastResults'];
 
             $attractiveness = CalculationsHelper::attractiveness($bets);
-            if ($attractiveness < 664) {
+            if ($attractiveness < 670) {
                 return;
             }
 
@@ -220,7 +220,7 @@ class ParseForecasts extends Command
             ->text();
         $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
 
-        if ($coefficient < 1.3 || $profit < 62) {
+        if ($coefficient < 1.3 || $profit < 183) {
             return null;
         }
 
