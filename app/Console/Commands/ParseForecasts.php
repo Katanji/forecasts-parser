@@ -26,9 +26,9 @@ class ParseForecasts extends Command
 
     private array $typesForExclude = [
         'КХЛ', 'Желтые карточки', 'Kontinental Hockey League', 'Вброс аутов', 'Фолы', 'Штрафное время', 'МХЛ', 'ВХЛ',
-        'Единая лига ВТБ', 'Броски в створ ворот', 'Голы в большинстве', 'Росси', 'Настольный теннис', 'Шахматы', 'MHL',
+        'Единая лига ВТБ', 'Броски в створ ворот', 'Голы в большинстве', 'Росси', 'Шахматы', 'MHL', 'Водное поло',
         'Фигурное катание', 'Индия. Суперкубок', 'Гандбол', 'Волейбол. European - Championship U20', 'Футбол. India',
-        'Адриатическая лига. Женщины', 'Кипр. Национальная лига. Женщины', 'Водное поло'
+        'Адриатическая лига. Женщины', 'Кипр. Национальная лига. Женщины',
     ];
 
     public function handle(): void
@@ -126,7 +126,7 @@ class ParseForecasts extends Command
             }
 
             $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
-            if ($profit < 183) {
+            if ($profit < 186) {
                 return;
             }
 
@@ -220,7 +220,7 @@ class ParseForecasts extends Command
             ->text();
         $profit = (int)round((float)$node->filter('.forecast-preview__author-stat-item span')->last()->text());
 
-        if ($coefficient < 1.3 || $profit < 183) {
+        if ($coefficient < 1.3 || $profit < 186) {
             return null;
         }
 
