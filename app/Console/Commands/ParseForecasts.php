@@ -76,7 +76,7 @@ class ParseForecasts extends Command
             $lastResults = $parsedAuthorData['lastResults'];
 
             $attractiveness = CalculationsHelper::attractiveness($bets);
-            if ($attractiveness < 670) {
+            if ($attractiveness < 699) {
                 return;
             }
 
@@ -147,7 +147,7 @@ class ParseForecasts extends Command
             $lastResults = $parsedAuthorData['lastResults'];
 
             $attractiveness = CalculationsHelper::attractiveness($bets);
-            if ($attractiveness < 670) {
+            if ($attractiveness < 699) {
                 return;
             }
 
