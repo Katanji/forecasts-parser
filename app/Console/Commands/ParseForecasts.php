@@ -24,12 +24,7 @@ class ParseForecasts extends Command
 
     protected $description = 'Parse info from site';
 
-    private array $typesForExclude = [
-        'КХЛ', 'Желтые карточки', 'Kontinental Hockey League', 'Вброс аутов', 'Фолы', 'Штрафное время', 'МХЛ', 'ВХЛ',
-        'Единая лига ВТБ', 'Броски в створ ворот', 'Голы в большинстве', 'Росси', 'Шахматы', 'MHL', 'Водное поло',
-        'Фигурное катание', 'Индия. Суперкубок', 'Гандбол', 'Волейбол. European - Championship U20', 'Футбол. India',
-        'Адриатическая лига. Женщины', 'Кипр. Национальная лига. Женщины',
-    ];
+    private array $typesForExclude = [];
 
     public function handle(): void
     {
