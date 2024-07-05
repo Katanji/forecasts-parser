@@ -13,7 +13,6 @@
                     <th>Teams</th>
                     <th>Sport Type</th>
                     <th>Prediction</th>
-                    <th>Attractiveness</th>
                     <th>Last Results</th>
                     <th>Profit</th>
                     <th>Coefficient</th>
@@ -29,7 +28,6 @@
                         <td>{{ $item->teams }}</td>
                         <td>{{ $item->sport_type }}</td>
                         <td>{{ $item->prediction }}</td>
-                        <td>{{ $item->attractivness }}</td>
                         <td>{{ $item->last_results }}</td>
                         <td>{{ $item->profit }}</td>
                         <td>{{ $item->coefficient }}</td>

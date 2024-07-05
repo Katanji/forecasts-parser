@@ -320,6 +320,11 @@ return [
             'url' => 'admin/forecasts',
             'icon' => 'far fa-fw fa-file',
         ],
+        [
+            'text' => 'logs',
+            'url' => 'admin/logs',
+            'icon' => 'far fa-fw fa-file',
+        ],
 //        ['header' => 'account_settings'],
 //        [
 //            'text' => 'profile',
