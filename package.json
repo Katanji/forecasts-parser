@@ -1,13 +1,18 @@
 {
     "private": true,
     "type": "module",
+    "engines": {
+        "node": ">=22.4.0"
+    },
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "preinstall": "node check-node-version.js"
     },
     "devDependencies": {
         "axios": "^1.6.1",
         "laravel-vite-plugin": "^1.0.0",
+        "semver": "^7.6.2",
         "vite": "^5.0.0"
     }
 }
