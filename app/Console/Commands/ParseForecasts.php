@@ -29,12 +29,32 @@ class ParseForecasts extends Command
     public function handle(): void
     {
         try {
+            if ($this->isAlreadyRunning()) {
+                $this->info('Command is already running!');
+                return;
+            }
+
             $options = $this->getHttpOptions();
             $this->handleForecasts($options);
             $this->handleExpresses($options);
         } catch (GuzzleException|Exception $e) {
             $this->logError($e);
         }
+    }
+
+    private function isAlreadyRunning(): bool
+    {
+        $command = 'parse:forecasts';
+        $path = storage_path('framework/schedule-' . sha1($command));
+
+        if (file_exists($path)) {
+            if (filemtime($path) > strtotime('-5 minutes')) {
+                return true;
+            }
+        }
+
+        file_put_contents($path, '');
+        return false;
     }
 
     /**
